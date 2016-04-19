@@ -58,12 +58,12 @@ postPayloadToSlack = (payload) ->
         short: true
     ]
 
-  payload =
+  formData =
     attachments: [
       attachment
     ]
 
-  request.post(url: SLACK_WEBHOOK_URL, form: JSON.stringify(payload), json: true, (error, response, body) ->
+  request.post(url: SLACK_WEBHOOK_URL, form: JSON.stringify(formData), json: true, (error, response, body) ->
     console.log error, "Posted: #{payload.earthquakeId}:#{paylaod.messageId}"
   )
 #
