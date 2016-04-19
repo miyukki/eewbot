@@ -13,6 +13,7 @@ twit = new Twit(
 
 twit.stream('statuses/filter', { follow: '214358709' })
     .on('tweet', (tweet) ->
+      return if tweet.retweeted_status?
       console.log(tweet.text)
       payload = new EEWPayload(tweet.text)
       postPayloadToSlack(payload)
