@@ -1,22 +1,14 @@
 class EEWPayload
-  MessageType:
-    Type1: 0x01
-    Type2: 0x02
-    Cancel: 0x03
-
-  TrainingFlag:
-    Normal: 0x01
-    Test: 0x02
-
-  WarningState:
-    Normal: 0x01
-    WrongCancel: 0x02
-    Last: 0x03
-
   constructor: (message) ->
     [ @messageType, @testFlag, @messageTime, @state, @messageId, @earthquakeId,
       @earthquakeTime, @latitude, @longitude, @hypocenterName, @depth,
       @magnitude, @maxIntensity, @hypocenterOcean, @alarm] = message.split(',')
+
+  isEstimatedMagnitude: ->
+    @messageType == '36' || @messageType == '37'
+
+  isCancel: ->
+    @messageType == '39'
 
   isTest: ->
     @testFlag == '01'
@@ -26,5 +18,8 @@ class EEWPayload
 
   isOcean: ->
     @hypocenterOcean == '1'
+
+  isLastMessage: ->
+    @state == '8' || @state == '9'
 
 module.exports = EEWPayload

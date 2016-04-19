@@ -19,6 +19,8 @@ twit.stream('statuses/filter', { follow: '214358709' })
     )
 
 postPayloadToSlack = (payload) ->
+  return if payload.isCancel()
+
   color =
     if payload.isTest()
       'good'
@@ -29,10 +31,12 @@ postPayloadToSlack = (payload) ->
 
   imageUrl = "https://maps.googleapis.com/maps/api/staticmap?center=#{payload.latitude},#{payload.longitude}" +
              "&zoom=6&size=640x400&markers=color:red%7C#{payload.latitude},#{payload.longitude}"
+  landSeaText = if payload.isOcean() then '海' else '陸'
+  lastText = if payload.isLastMessage() then '最終報' else '継続報'
 
   attachment =
-    # author_name: "＜テスト＞"
-    text: "震源地:#{payload.hypocenterName} 最大震度:#{payload.maxIntensity}"
+    author_name: "#{payload.earthquakeId}:#{payload.messageId}:#{lastText}"
+    pretext: "最大震度 #{payload.maxIntensity} の地震が #{payload.hypocenterName}[#{landSeaText}] で発生しました"
     color: color
     image_url: imageUrl
     fields: [
@@ -41,7 +45,7 @@ postPayloadToSlack = (payload) ->
         short: true
       ,
         title: "マグニチュード"
-        value: payload.magnitude
+        value: if payload.isEstimatedMagnitude() then payload.magnitude else '情報なし'
         short: true
       ,
         title: "震源地"
@@ -61,6 +65,6 @@ postPayloadToSlack = (payload) ->
   request.post(url: SLACK_WEBHOOK_URL, form: JSON.stringify(payload), json: true, (error, response, body) ->
     console.log error, response, body
   )
-
+#
 # payload = new EEWPayload('37,00,2011/04/03 23:53:51,0,2,ND20110403235339,2011/04/03 23:53:21,37.8,142.3,宮城県沖,10,4.5,2,1,0')
 # postPayloadToSlack(payload)
