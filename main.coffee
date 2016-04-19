@@ -12,8 +12,9 @@ twit = new Twit(
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 )
 
-TWITTER_EEWBOT_ID = 214358709
+TWITTER_NERV_ID = 116548789
 TWITTER_TSUNAMITELOP_ID = 323709099
+TWITTER_EEWBOT_ID = 214358709
 
 twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_TSUNAMITELOP_ID].join(',') })
     .on('tweet', (tweet) ->
@@ -21,7 +22,7 @@ twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_TSUNAMITELO
       console.log(tweet)
 
       payload =
-        if tweet.user.id == TWITTER_TSUNAMITELOP_ID
+        if tweet.user.id == TWITTER_TSUNAMITELOP_ID || tweet.user.id == TWITTER_NERV_ID
           new TweetPayload(tweet)
         else if tweet.user.id == TWITTER_EEWBOT_ID
           new EEWPayload(tweet.text)
