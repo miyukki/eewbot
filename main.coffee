@@ -1,6 +1,7 @@
 Twit = require 'twit'
 request = require 'request'
 EEWPayload = require './EEWPayload'
+TweetPayload = require './TweetPayload'
 
 SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
 
@@ -11,61 +12,25 @@ twit = new Twit(
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 )
 
-twit.stream('statuses/filter', { follow: '214358709' })
+TWITTER_EEWBOT_ID = 214358709
+TWITTER_TSUNAMITELOP_ID = 323709099
+
+twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_TSUNAMITELOP_ID].join(',') })
     .on('tweet', (tweet) ->
       return if tweet.retweeted_status?
-      console.log(tweet.text)
-      payload = new EEWPayload(tweet.text)
-      postPayloadToSlack(payload)
+      console.log(tweet)
+
+      payload =
+        if tweet.user.id == TWITTER_TSUNAMITELOP_ID
+          new TweetPayload(tweet)
+        else if tweet.user.id == TWITTER_EEWBOT_ID
+          new EEWPayload(tweet.text)
+
+      if payload? && payload.shouldNotify()
+        postSlackWebhook(payload.buildSlackMessage())
     )
 
-postPayloadToSlack = (payload) ->
-  return if payload.isCancel()
-
-  color =
-    if payload.isTest()
-      'good'
-    else if payload.isAlarm()
-      'danger'
-    else
-      'warning'
-
-  imageUrl = "https://maps.googleapis.com/maps/api/staticmap?center=#{payload.latitude},#{payload.longitude}" +
-             "&zoom=6&size=640x400&markers=color:red%7C#{payload.latitude},#{payload.longitude}"
-  landSeaText = if payload.isOcean() then '海' else '陸'
-  lastText = if payload.isLastMessage() then '最終報' else '継続報'
-
-  attachment =
-    author_name: "#{payload.earthquakeId}:#{payload.messageId}:#{lastText}"
-    pretext: "最大震度 #{payload.maxIntensity} の地震が #{payload.hypocenterName}[#{landSeaText}] で発生しました"
-    color: color
-    image_url: imageUrl
-    fields: [
-        title: "最大震度"
-        value: payload.maxIntensity
-        short: true
-      ,
-        title: "マグニチュード"
-        value: if payload.isEstimatedMagnitude() then payload.magnitude else '情報なし'
-        short: true
-      ,
-        title: "震源地"
-        value: payload.hypocenterName
-        short: true
-      ,
-        title: "地震発生時刻"
-        value: payload.earthquakeTime
-        short: true
-    ]
-
-  formData =
-    attachments: [
-      attachment
-    ]
-
+postSlackWebhook = (formData) ->
   request.post(url: SLACK_WEBHOOK_URL, form: JSON.stringify(formData), json: true, (error, response, body) ->
-    console.log error, "Posted: #{payload.earthquakeId}:#{payload.messageId}"
+    console.log error, "Posted: ", formData
   )
-#
-# payload = new EEWPayload('37,00,2011/04/03 23:53:51,0,2,ND20110403235339,2011/04/03 23:53:21,37.8,142.3,宮城県沖,10,4.5,2,1,0')
-# postPayloadToSlack(payload)
