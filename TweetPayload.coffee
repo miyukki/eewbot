@@ -5,18 +5,19 @@ class TweetPayload
     true
 
   buildSlackMessage: ->
-    tweetUrl = "https://twitter.com/#{@tweet.screen_name}/status/#{@tweet.id}"
-
+    tweetText = @tweet.text
     attachments = []
+
     for media in @tweet.entities.media
       continue if media.type != 'photo'
+      tweetText = tweetText.replace(media.url, '')
       attachments.push(
         image_url: media.media_url_https
       )
 
     icon_url: @tweet.user.profile_image_url_https
     username: @tweet.user.name
-    text: "#{@tweet.text} <#{tweetUrl}|Status>"
+    text: tweetText
     attachments: attachments
 
 module.exports = TweetPayload
