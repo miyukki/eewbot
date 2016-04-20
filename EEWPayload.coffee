@@ -42,7 +42,7 @@ class EEWPayload extends TweetPayload
     stageText = if @isLastMessage() then '最終報' else "第#{@messageId}報"
 
     attachment =
-      author_name: "#{@earthquakeId}:#{@messageId}:#{lastText}"
+      author_name: "#{@earthquakeId}:#{@messageId}:#{stageText}"
       pretext: "最大震度 #{@maxIntensity} の地震が #{@hypocenterName}[#{landSeaText}] で発生しました"
       color: color
       image_url: imageUrl
