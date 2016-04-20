@@ -16,13 +16,15 @@ TWITTER_NERV_ID = 116548789
 TWITTER_TSUNAMITELOP_ID = 323709099
 TWITTER_EEWBOT_ID = 214358709
 
-twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_TSUNAMITELOP_ID].join(',') })
+twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TWITTER_TSUNAMITELOP_ID].join(',') })
     .on('tweet', (tweet) ->
       return if tweet.retweeted_status?
       console.log(tweet)
 
       payload =
-        if tweet.user.id == TWITTER_TSUNAMITELOP_ID || tweet.user.id == TWITTER_NERV_ID
+        if tweet.user.id == TWITTER_TSUNAMITELOP_ID
+          new TweetPayload(tweet)
+        else if tweet.user.id == TWITTER_NERV_ID && tweet.text.indexOf('地震情報') != -1
           new TweetPayload(tweet)
         else if tweet.user.id == TWITTER_EEWBOT_ID
           new EEWPayload(tweet.text)
