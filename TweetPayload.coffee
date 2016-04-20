@@ -4,6 +4,9 @@ class TweetPayload
   shouldNotify: ->
     true
 
+  notifySlackMessage: (postFunction) ->
+    postFunction(@buildSlackMessage())
+
   buildSlackMessage: ->
     tweetText = @tweet.text
     attachments = []

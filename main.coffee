@@ -30,7 +30,7 @@ twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TW
           new EEWPayload(tweet.text)
 
       if payload? && payload.shouldNotify()
-        postSlackWebhook(payload.buildSlackMessage())
+        payload.notifySlackMessage(postSlackWebhook)
     )
 
 postSlackWebhook = (formData) ->

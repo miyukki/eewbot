@@ -27,6 +27,15 @@ class EEWPayload extends TweetPayload
   shouldNotify: ->
     @earthquakeId? && !@isCancel()
 
+  notifySlackMessage: (postFunction) ->
+    formData = @buildSlackMessage()
+    postFunction(formData)
+
+    if @messageId == '1' && @isAlarm()
+      formData.text = '緊急地震速報が発令されました'
+      formData.channel = '#arch'
+      postFunction(formData)
+
   buildSlackMessage: ->
     color =
       if @isTest()
