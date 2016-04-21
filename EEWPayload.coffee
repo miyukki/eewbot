@@ -73,7 +73,7 @@ class EEWPayload extends TweetPayload
           short: true
       ]
 
-    username: '緊急地震速報(EEW)'
+    username: '緊急地震速報[EEW]'
     attachments: [
       attachment
     ]
