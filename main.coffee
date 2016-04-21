@@ -39,7 +39,7 @@ twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TW
     )
 
 captureTelevision = (postFunction) ->
-  unless TV_CAPTURE_URL? && UPLOADER_URL?
+  return unless TV_CAPTURE_URL? && UPLOADER_URL?
   request.get(url: TV_CAPTURE_URL, encoding: null, (err, response, body) ->
     formData =
       file:
