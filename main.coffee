@@ -3,6 +3,8 @@ request = require 'request'
 EEWPayload = require './EEWPayload'
 TweetPayload = require './TweetPayload'
 
+TV_CAPTURE_URL = process.env.TV_CAPTURE_URL
+UPLOADER_URL = process.env.UPLOADER_URL
 SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
 
 twit = new Twit(
@@ -31,7 +33,24 @@ twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TW
 
       if payload? && payload.shouldNotify()
         payload.notifySlackMessage(postSlackWebhook)
+
+        if payload instanceof EEWPayload && payload.isLastMessage()
+          captureTelevision(postSlackWebhook)
     )
+
+captureTelevision = (postFunction) ->
+  unless TV_CAPTURE_URL? && UPLOADER_URL?
+  request.get(url: TV_CAPTURE_URL, encoding: null, (err, response, body) ->
+    formData =
+      file:
+        value:  body
+        options:
+          filename: 'capture.png'
+          contentType: 'image/png'
+    request.post(url: UPLOADER_URL, formData: formData, (err, response, body) ->
+      postFunction(text: body)
+    )
+  )
 
 postSlackWebhook = (formData) ->
   request.post(url: SLACK_WEBHOOK_URL, form: JSON.stringify(formData), json: true, (error, response, body) ->
