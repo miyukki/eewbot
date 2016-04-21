@@ -48,7 +48,14 @@ captureTelevision = (postFunction) ->
           filename: 'capture.png'
           contentType: 'image/png'
     request.post(url: UPLOADER_URL, formData: formData, (err, response, body) ->
-      postFunction(username: 'NHK総合テレビジョン', icon_emoji: ':tv:', text: body)
+      formData =
+        username: 'TV'
+        icon_emoji: ':tv:'
+        attachments: [
+          title: "NHK総合テレビジョン"
+          image_url: body
+        ]
+      postFunction(formData)
     )
   )
 
