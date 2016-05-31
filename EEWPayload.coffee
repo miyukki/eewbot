@@ -54,7 +54,7 @@ class EEWPayload extends TweetPayload
       author_name: "#{@earthquakeId}:#{@messageId}:#{stageText}"
       pretext: "最大震度 #{@maxIntensity} の地震が #{@hypocenterName}[#{landSeaText}] で発生しました"
       color: color
-      image_url: imageUrl
+      image_url: if @messageId == '1' then imageUrl else null
       fields: [
           title: "最大震度"
           value: @maxIntensity

@@ -45,8 +45,8 @@ captureTelevision = (postFunction) ->
       file:
         value:  body
         options:
-          filename: 'capture.png'
-          contentType: 'image/png'
+          filename: 'capture.jpg'
+          contentType: 'image/jpeg'
     request.post(url: UPLOADER_URL, formData: formData, (err, response, body) ->
       formData =
         username: 'TV'
