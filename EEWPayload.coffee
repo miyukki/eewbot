@@ -31,9 +31,9 @@ class EEWPayload extends TweetPayload
     formData = @buildSlackMessage()
     postFunction(formData)
 
-    if @messageId == '1' && @isAlarm()
+    if @isLastMessage() && @isAlarm()
       formData.text = '緊急地震速報が発令されました'
-      formData.channel = '#arch'
+      formData.channel = '#random'
       postFunction(formData)
 
   buildSlackMessage: ->
