@@ -4,6 +4,7 @@ EEWPayload = require './EEWPayload'
 TweetPayload = require './TweetPayload'
 
 TV_CAPTURE_URL = process.env.TV_CAPTURE_URL
+WNI_CAPTURE_URL = process.env.WNI_CAPTURE_URL
 UPLOADER_URL = process.env.UPLOADER_URL
 SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
 
@@ -36,6 +37,7 @@ twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TW
 
         if payload instanceof EEWPayload && payload.isLastMessage()
           captureTelevision(postSlackWebhook)
+          captureWni(postSlackWebhook)
     )
 
 captureTelevision = (postFunction) ->
@@ -53,6 +55,27 @@ captureTelevision = (postFunction) ->
         icon_emoji: ':tv:'
         attachments: [
           title: "NHK総合テレビジョン"
+          image_url: body
+        ]
+      postFunction(formData)
+    )
+  )
+
+captureWni = (postFunction) ->
+  return unless WNI_CAPTURE_URL? && UPLOADER_URL?
+  request.get(url: WNI_CAPTURE_URL, encoding: null, (err, response, body) ->
+    formData =
+      file:
+        value:  body
+        options:
+          filename: 'capture.jpg'
+          contentType: 'image/jpeg'
+    request.post(url: UPLOADER_URL, formData: formData, (err, response, body) ->
+      formData =
+        username: 'TV'
+        icon_emoji: ':tv:'
+        attachments: [
+          title: "ウェザーニュース"
           image_url: body
         ]
       postFunction(formData)
