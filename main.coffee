@@ -7,6 +7,9 @@ TV_CAPTURE_URL = process.env.TV_CAPTURE_URL
 WNI_CAPTURE_URL = process.env.WNI_CAPTURE_URL
 UPLOADER_URL = process.env.UPLOADER_URL
 SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
+TWITTER_NERV_ID = 116548789
+TWITTER_TSUNAMITELOP_ID = 323709099
+TWITTER_EEWBOT_ID = 214358709
 
 twit = new Twit(
   consumer_key: process.env.TWITTER_CONSUMER_KEY
@@ -15,9 +18,7 @@ twit = new Twit(
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 )
 
-TWITTER_NERV_ID = 116548789
-TWITTER_TSUNAMITELOP_ID = 323709099
-TWITTER_EEWBOT_ID = 214358709
+alermEarthquakeIds = []
 
 twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TWITTER_TSUNAMITELOP_ID].join(',') })
     .on('tweet', (tweet) ->
@@ -35,6 +36,12 @@ twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TW
       if payload? && payload.shouldNotify()
         payload.notifySlackMessage(postSlackWebhook)
 
+        if payload instanceof EEWPayload && payload.isAlarm() && !alermEarthquakeIds.includes(payload.earthquakeId)
+          alermEarthquakeIds.push(payload.earthquakeId)
+          formData = payload.buildSlackMessage()
+          formData.text = '緊急地震速報が発令されました'
+          formData.channel = '#random'
+          postSlackWebhook(formData)
         if payload instanceof EEWPayload && payload.isLastMessage()
           captureTelevision(postSlackWebhook)
           captureWni(postSlackWebhook)
