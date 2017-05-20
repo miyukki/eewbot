@@ -23,7 +23,7 @@ alermEarthquakeIds = []
 twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TWITTER_TSUNAMITELOP_ID].join(',') })
     .on('tweet', (tweet) ->
       return if tweet.retweeted_status?
-      console.log(tweet)
+      console.log("get tweet id=#{tweet.id} text=#{tweet.text}")
 
       payload =
         if tweet.user.id == TWITTER_TSUNAMITELOP_ID
@@ -34,9 +34,11 @@ twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TW
           new EEWPayload(tweet.text)
 
       if payload? && payload.shouldNotify()
+        console.log("payload will be notify")
         payload.notifySlackMessage(postSlackWebhook)
 
         if payload instanceof EEWPayload && payload.isAlarm() && !alermEarthquakeIds.includes(payload.earthquakeId)
+          console.log("alert eew")
           alermEarthquakeIds.push(payload.earthquakeId)
           formData = payload.buildSlackMessage()
           formData.text = '緊急地震速報が発令されました'
@@ -48,6 +50,7 @@ twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TW
     )
 
 captureTelevision = (postFunction) ->
+  console.log("capture television")
   return unless TV_CAPTURE_URL? && UPLOADER_URL?
   request.get(url: TV_CAPTURE_URL, encoding: null, (err, response, body) ->
     formData =
@@ -69,6 +72,7 @@ captureTelevision = (postFunction) ->
   )
 
 captureWni = (postFunction) ->
+  console.log("capture wni")
   return unless WNI_CAPTURE_URL? && UPLOADER_URL?
   request.get(url: WNI_CAPTURE_URL, encoding: null, (err, response, body) ->
     formData =
@@ -90,6 +94,9 @@ captureWni = (postFunction) ->
   )
 
 postSlackWebhook = (formData) ->
+  console.log("post slack webhook", formData)
   request.post(url: SLACK_WEBHOOK_URL, form: JSON.stringify(formData), json: true, (error, response, body) ->
-    console.log error, "Posted: ", formData
+    if error
+      console.error(error)
+    # console.log error, "Posted: ", formData
   )
