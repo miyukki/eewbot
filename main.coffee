@@ -22,8 +22,8 @@ alermEarthquakeIds = []
 
 twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TWITTER_TSUNAMITELOP_ID].join(',') })
     .on('tweet', (tweet) ->
-      return if tweet.retweeted_status?
-      console.log("get tweet id=#{tweet.id} text=#{tweet.text}")
+      return if tweet.retweeted_status? || tweet.in_reply_status_id?
+      console.log("get tweet id=#{tweet.id} screen_name=#{tweet.user.screen_name} text=#{tweet.text.replace(/[\r\n]/g, '')}")
 
       payload =
         if tweet.user.id == TWITTER_TSUNAMITELOP_ID
@@ -34,11 +34,10 @@ twit.stream('statuses/filter', { follow: [TWITTER_EEWBOT_ID, TWITTER_NERV_ID, TW
           new EEWPayload(tweet.text)
 
       if payload? && payload.shouldNotify()
-        console.log("payload will be notify")
+        console.log("payload will be notify id=#{tweet.id}")
         payload.notifySlackMessage(postSlackWebhook)
 
         if payload instanceof EEWPayload && payload.isAlarm() && !alermEarthquakeIds.includes(payload.earthquakeId)
-          console.log("alert eew")
           alermEarthquakeIds.push(payload.earthquakeId)
           formData = payload.buildSlackMessage()
           formData.text = '緊急地震速報が発令されました'
@@ -98,5 +97,4 @@ postSlackWebhook = (formData) ->
   request.post(url: SLACK_WEBHOOK_URL, form: JSON.stringify(formData), json: true, (error, response, body) ->
     if error
       console.error(error)
-    # console.log error, "Posted: ", formData
   )
